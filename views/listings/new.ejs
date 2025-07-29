@@ -1,0 +1,95 @@
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-5">
+  <h2 class="mb-4 text-center">Create a New Listing</h2>
+
+  <form method="POST" action="/listings" class="needs-validation" novalidate enctype="multipart/form-data">
+
+    <!-- Image Preview -->
+    <div class="mb-3 text-center">
+      <img id="preview" src="" alt="Image Preview" class="img-fluid rounded" style="max-height: 200px; display: none;">
+    </div>
+
+    <!-- File Upload (Cloudinary) -->
+    <div class="mb-3">
+      <label for="image" class="form-label">Upload Image</label>
+      <input name="image" id="image" type="file" class="form-control" accept="image/*" required />
+      <div class="invalid-feedback">Please upload an image.</div>
+    </div>
+
+    <!-- Title -->
+    <div class="mb-3">
+      <label for="title" class="form-label">Title</label>
+      <input name="listing[title]" id="title" type="text" class="form-control" placeholder="Enter title" required />
+      <div class="invalid-feedback">Please provide a title.</div>
+      <div class="valid-feedback">Title looks good</div>
+    </div>
+
+    <!-- Description -->
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea name="listing[description]" id="description" class="form-control" rows="3" placeholder="Enter description" required></textarea>
+      <div class="invalid-feedback">Please enter a description.</div>
+    </div>
+
+    <!-- Price -->
+    <div class="mb-3">
+      <label for="price" class="form-label">Price (₹)</label>
+      <input name="listing[price]" id="price" type="number" class="form-control" placeholder="Enter price" required min="1" />
+      <div class="invalid-feedback">Please enter a valid price greater than 0.</div>
+    </div>
+
+    <!-- Country -->
+    <div class="mb-3">
+      <label for="country" class="form-label">Country</label>
+      <input name="listing[country]" id="country" type="text" class="form-control" placeholder="Enter country" required />
+      <div class="invalid-feedback">Please enter the country.</div>
+    </div>
+
+    <!-- Location -->
+    <div class="mb-3">
+      <label for="location" class="form-label">Location</label>
+      <input name="listing[location]" id="location" type="text" class="form-control" placeholder="Enter location" required />
+      <div class="invalid-feedback">Please enter the location.</div>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100">Add Listing</button>
+  </form>
+</div>
+
+<!-- Validation & Image Preview -->
+<script>
+  (() => {
+    'use strict';
+
+    const forms = document.querySelectorAll('.needs-validation');
+    const previewImg = document.getElementById("preview");
+    const imageInput = document.getElementById("image");
+
+    Array.from(forms).forEach(form => {
+      form.addEventListener('submit', event => {
+        if (!form.checkValidity()) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
+        form.classList.add('was-validated');
+      }, false);
+    });
+
+    // File preview
+    imageInput.addEventListener("change", () => {
+      const file = imageInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          previewImg.src = e.target.result;
+          previewImg.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      } else {
+        previewImg.src = "";
+        previewImg.style.display = "none";
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,224 @@
+<% layout("layouts/boilerplate") %>
+
+<div class="container my-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow rounded">
+        <% if (listing.image && listing.image.url) { %>
+          <img src="<%= listing.image.url %>" class="card-img-top" alt="Listing Image">
+        <% } %>
+        <div class="card-body">
+          <h3 class="card-title"><%= listing.title %></h3>
+          <p class="card-text"><%= listing.description %></p>
+          <ul class="list-group list-group-flush my-3">
+            <li class="list-group-item"><strong>Price:</strong> ₹<%= listing.price ? listing.price.toLocaleString("en-IN") : "N/A" %></li>
+            <li class="list-group-item"><strong>Location:</strong> <%= listing.location %></li>
+            <li class="list-group-item"><strong>Country:</strong> <%= listing.country %></li>
+          </ul>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+          <a href="/listings/<%= listing._id %>/edit" class="btn btn-warning me-2">Edit Listing</a>
+          <form method="POST" action="/listings/<%= listing._id %>?_method=DELETE" class="d-inline">
+            <button class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this listing?')">Delete</button>
+          </form>
+        </div>
+      </div>
+
+
+<div id="map"></div>
+      <link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<style>
+  #map {
+    height: 400px;
+    width: 100%;
+    border-radius: 10px;
+    margin-top: 20px;
+  }
+</style>
+
+
+
+
+
+
+
+
+
+      <!-- Review Section -->
+      <div class="mt-5">
+        <h4 class="mb-3">Leave a Review</h4>
+    <form action="/listings/<%= listing._id %>/reviews" method="POST" novalidate class="needs-validation" id="reviewForm">
+
+  <!-- Star Rating -->
+  <div class="mb-3">
+    <label class="form-label d-block">Rating</label>
+    <div class="star-rating">
+      <% for (let i = 5; i >= 1; i--) { %>
+        <input type="radio" id="star<%= i %>" name="rating" value="<%= i %>" required>
+        <label for="star<%= i %>"><i class="bi bi-star-fill"></i></label>
+      <% } %>
+    </div>
+    <div id="ratingFeedback" class="invalid-feedback">
+      Please select a rating.
+    </div>
+  </div>
+
+  <!-- Comment Box -->
+  <div class="mb-3">
+    <label for="comment" class="form-label">Comment</label>
+    <textarea class="form-control" name="comment" id="comment" rows="3" required></textarea>
+    <div class="invalid-feedback">
+      Please enter a comment.
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <button type="submit" class="btn btn-primary">Submit Review</button>
+</form>
+
+      <!-- Display Reviews -->
+      <div class="mt-4">
+        <h5 class="mb-3">Reviews:</h5>
+        <% if (listing.reviews && listing.reviews.length > 0) { %>
+          <% listing.reviews.forEach(review => { %>
+            <div class="border rounded p-3 mb-3 bg-light">
+              <strong>Rating:</strong>
+              <span class="text-warning">
+                <% for(let i = 1; i <= 5; i++) { %>
+                  <% if(i <= review.rating) { %>
+                    <i class="bi bi-star-fill"></i>
+                  <% } else { %>
+                    <i class="bi bi-star"></i>
+                  <% } %>
+                <% } %>
+              </span>
+              <br>
+              <strong>Comment:</strong> <%= review.comment %><br>
+              <% if (review.author && review.author.username) { %>
+                <small class="text-muted">Posted by <strong><%= review.author.username %></strong> on <%= new Date(review.createdAt).toLocaleDateString() %></small>
+              <% } else { %>
+                <small class="text-muted">Posted on <%= new Date(review.createdAt).toLocaleDateString() %></small>
+              <% } %>
+
+              <% if (currentUser && review.author && review.author._id.equals(currentUser._id)) { %>
+                <form action="/listings/<%= listing._id %>/reviews/<%= review._id %>?_method=DELETE" method="POST" onsubmit="return confirm('Are you sure you want to delete this review?')" class="mt-2 text-end">
+                  <button class="btn btn-sm btn-danger">Delete Review</button>
+                </form>
+              <% } %>
+            </div>
+          <% }) %>
+        <% } else { %>
+          <p class="text-muted">No reviews yet. Be the first to review!</p>
+        <% } %>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Validation Scripts -->
+<script>
+  (function () {
+    'use strict';
+
+    const form = document.getElementById('reviewForm');
+    const ratingInputs = document.querySelectorAll('input[name="rating"]');
+    const ratingFeedback = document.getElementById('ratingFeedback');
+
+    form.addEventListener('submit', function (event) {
+      let ratingSelected = false;
+      ratingInputs.forEach((input) => {
+        if (input.checked) {
+          ratingSelected = true;
+        }
+      });
+
+      if (!form.checkValidity() || !ratingSelected) {
+        event.preventDefault();
+        event.stopPropagation();
+
+        // Show rating error manually
+        if (!ratingSelected) {
+          ratingFeedback.style.display = 'block';
+        }
+      } else {
+        ratingFeedback.style.display = 'none';
+      }
+
+      form.classList.add('was-validated');
+    });
+
+    // Hide error when user selects a rating
+    ratingInputs.forEach((input) => {
+      input.addEventListener('change', () => {
+        ratingFeedback.style.display = 'none';
+      });
+    });
+  })();
+</script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const locationQuery = "<%= listing.location %>";
+
+    // Use OpenStreetMap's Nominatim to geocode the address
+    fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${locationQuery}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data && data.length > 0) {
+          const lat = data[0].lat;
+          const lon = data[0].lon;
+
+          const map = L.map('map').setView([lat, lon], 13);
+
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
+          }).addTo(map);
+
+          // ✅ Custom red marker icon
+          const redIcon = L.icon({
+            iconUrl: "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png",
+            shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+          });
+
+          // ✅ Add red marker to map
+          L.marker([lat, lon], { icon: redIcon }).addTo(map)
+            .bindPopup("<%= listing.title %><br><%= listing.location %>")
+            .openPopup();
+        } else {
+          document.getElementById('map').innerHTML = "<p class='text-danger'>Map not available for this location.</p>";
+        }
+      })
+      .catch(err => {
+        console.error("Geocoding error:", err);
+        document.getElementById('map').innerHTML = "<p class='text-danger'>Map could not load.</p>";
+      });
+  });
+</script>
+

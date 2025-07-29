@@ -1,0 +1,9 @@
+<!-- views/error.ejs -->
+<% layout('layouts/boilerplate') %>
+
+<div class="container mt-5">
+  <div class="alert alert-danger text-center" role="alert">
+    <h4 class="alert-heading">Error <%= err.statusCode %></h4>
+    <p><%= err.message %></p>
+  </div>
+</div>
