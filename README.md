@@ -9,7 +9,7 @@
 
 ## 🚀 Features
 
-- 🔍 Advanced property search (location, country, price)
+
 - 🏠 Create/view/edit/delete property listings with images
 - 📅 Booking system with date selection and total price calculation
 - 🔐 User authentication (Register/Login/Logout)
