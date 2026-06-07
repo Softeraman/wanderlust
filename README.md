@@ -4,7 +4,7 @@
 **Wanderlust** is a full-featured travel accommodation web application inspired by Airbnb. It enables users to browse, list, and book rental properties, offering a seamless and intuitive user experience with dynamic listings, secure authentication, and real-time map integration.
 
 ## 🚀 Live Demo  
-👉 [https://project-wanderlust-psi.vercel.app/listings?])
+👉 ([https://project-wanderlust-psi.vercel.app/listings?])
 
 
 ## 🚀 Features
